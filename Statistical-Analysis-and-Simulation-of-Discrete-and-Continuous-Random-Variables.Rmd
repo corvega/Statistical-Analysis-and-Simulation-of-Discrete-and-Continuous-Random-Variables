@@ -1,0 +1,610 @@
+---
+title: "SCEM - Assessment - B"
+author: "ND22051"
+date: "2022-12-05"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+library(boot)
+```
+
+# Section B
+
+## B.1
+
+### 1)
+
+Probability of line A light bulbs lifetime $\ge$ 2 years = $P_A$
+
+Probability of line B light bulbs lifetime $\ge$ 2 years = $P_B$
+
+$P_A > P_B$
+
+Probability of light bulb being from line B given its lifetime is less than 2 years = $\alpha$
+
+Conditional Probability:
+
+A is the event that the light bulb is from line B
+
+B is the event that the life time is less than 2 years
+
+$\alpha = \mathbb{P}(A|B)$
+
+$\mathbb{P}(B^{c}|A^{c}) = P_A$
+
+$\mathbb{P}(B^c|A)=P_B$
+
+$\mathbb{P}(B|A) = 1 - P_B$
+
+$\mathbb{P}(A^c)=p$
+
+$\mathbb{P}(A) = 1-p$
+
+$\mathbb{P}(B) = \mathbb{P}(B|A)\cdot\mathbb{P}(A)+\mathbb{P}(B|A^c)\cdot\mathbb{P}(A^c)$
+
+$=(1-P_B)\cdot(1-p)+(1-P_A)\cdot p$
+
+$\alpha = \mathbb{P}(A|B) = \frac {(1-p)\cdot(1-P_B)}{(1-P_B)\cdot(1-p)+(1-P_A)\cdot p}$
+
+### 2)
+
+$P_A = 0.99$
+
+$P_B = 0.5$
+
+$p = 0.1$
+
+$\frac{(1-0.1)\cdot(1-0.5)}{(1-0.5)\cdot(1-0.1)+(1-0.99)\cdot0.1}$
+
+$\alpha = 0.9977827051$
+
+### 3)
+
+#### i & ii)
+
+```{r}
+num_trials<-10000
+p <- 0.1
+p_a <- 0.99
+p_b <- 0.5
+set.seed(0) # set random seed for reproducibility
+Line <- rbinom(num_trials,1,(1-p)) #representing p
+LessThen2Years <- c() #Probability of being equal to 0 is p_A, probability of being equal to 1 is p_B
+for (L in Line) {
+  if (L == 0){
+     LessThen2Years <- append(LessThen2Years,rbinom(1,1,(1-p_a)))
+  }
+  if (L == 1){
+     LessThen2Years <- append(LessThen2Years,rbinom(1,1,(1-p_b)))
+  }
+}
+simulation_study_df <- data.frame(Line,LessThen2Years)
+```
+
+### 4)
+
+Displaying an estimate for the conditional probability of $\alpha$.
+
+```{r}
+sub_simulation_study_df <- filter(simulation_study_df,LessThen2Years==1)
+est <- nrow(filter(sub_simulation_study_df, Line==1)) / nrow(sub_simulation_study_df)
+est
+```
+
+## B.2
+
+### 1)
+
+Here we know that the integral of a probability density function (p.d.f) between negative infinity and infinity of a continuous random variable must equal 1. We can use this to find a representation of a in terms of $\lambda$ and b. $$
+p_\lambda=
+\begin{cases}
+ae^{-\lambda(x-b)} & \text{ if } x \ge b \\
+0 & \text{ if } x<b
+\end{cases}
+$$
+
+$$
+\int_{0}^{\infty} ae^{-\lambda(x-b)} = 1
+$$
+
+$$
+[\frac{-ae^{-\lambda(x-b)}}{\lambda}]_{0}^{\infty}=1
+$$
+
+$$
+\frac{-ae^{-\infty}}{\lambda}-\frac{-ae^{\lambda b}}{\lambda}=1
+$$
+
+$$
+-ae^{-\infty}+ae^{\lambda b} = \lambda
+$$
+
+$$
+0 + ae^{\lambda b} = \lambda
+$$
+
+$$
+ae^{\lambda b} = \lambda
+$$
+
+$$
+a = \frac{\lambda}{e^{\lambda b}}
+$$
+
+However as specified in the p.d.f x must be greater than b else the probability is 0, as a result we should instead integrate between b and infinity.
+
+$$
+p_\lambda=
+\begin{cases}
+ae^{-\lambda(x-b)} & \text{ if } x \ge b \\
+0 & \text{ if } x<b
+\end{cases}
+$$
+
+$$
+\int_{b}^{\infty} ae^{-\lambda(x-b)} = 1
+$$
+
+$$
+[\frac{-ae^{-\lambda(x-b)}}{\lambda}]_{b}^{\infty}=1
+$$
+
+$$
+\frac{-ae^{-\lambda(\infty-b)}}{\lambda} - (\frac{-ae^{-\lambda (b-b)}}{\lambda})
+$$
+
+$$
+0- (\frac{-a}{\lambda}) = 1
+$$
+
+$$
+\frac{a}{\lambda}=1
+$$
+
+$$
+a=\lambda
+$$
+
+### 2)
+
+Population mean is equivalent to the expectation of X $\mathbb{E}(X)$.
+
+$\mathbb{E}(X) = \int_{0}^{\infty}x f_x(x) dx$
+
+$f_x = ae^{-\lambda(x-b)}$
+
+$\mathbb{E}(X) = \frac{ae^{\lambda b}}{\lambda ^2} = \frac{\frac{\lambda}{e^{\lambda b}}e^{\lambda b}}{\lambda ^2} = \frac{\lambda}{\lambda ^2}=\frac{1}{\lambda}$
+
+Standard deviation
+
+$\sigma(X) = \sqrt{\int_{0}^{\infty}(X-\mathbb{E}(X)) f_x(x) dx}$
+
+$\sigma(X) = \sqrt{\int_{0}^{\infty}(X-\frac{ae^{\lambda b}}{\lambda ^2})^2 \cdot ae^{-\lambda(x-b)}}$
+
+$Var(X) = \mathbb{E}(X^2)-[\mathbb{E}(X)]^2$
+
+$\mathbb{E}(X^2) = \int_{}^{}x^2 \cdot f_x(x) dx$
+
+$= \frac{2ae^{\lambda b}}{\lambda^3}-(\frac{ae^{\lambda b}}{\lambda^2})^2$
+
+$\sigma(X) = \sqrt{\frac{2ae^{\lambda b}}{\lambda^3}-(\frac{ae^{\lambda b}}{\lambda^2})^2}$
+
+$\sigma(X) = \sqrt{\frac{2\lambda}{e^{\lambda b}} \cdot \frac{e^{\lambda b}}{\lambda^3}-\frac{\lambda^2}{e^{2\lambda b}} \cdot \frac{e^{2\lambda b}}{\lambda^4}}$
+
+$\sigma(X) = \sqrt{\frac{2}{\lambda^2}-\frac{1}{\lambda^2}}$
+
+$\sigma(X) = \sqrt{\frac{1}{\lambda^2}} = \frac{1}{\lambda}$
+
+### Reworking for the result of a = $\lambda$ as shown above
+
+Population mean is equivalent to the expectation of X $\mathbb{E}(X)$.
+
+$\mathbb{E}(X) = \int_{-\infty}^{\infty}x f_x(x) dx$
+
+Because p.d.f is only non-zero between b and infinity this becomes
+
+$\mathbb{E}(X) = \int_{b}^{\infty}x f_x(x) dx$
+
+$f_x = ae^{-\lambda(x-b)} = \lambda e^{-\lambda(x-b)}$
+
+substituting in $f_x$ and a = $\lambda$
+
+$\int_{b}^{\infty}x \lambda e^{-\lambda(x-b)} = b+\frac{1}{\lambda}$
+
+$\mathbb{E}(X) = b+\frac{1}{\lambda}$
+
+Standard deviation
+
+$\sigma(X) = \sqrt{\int_{b}^{\infty}(X-\mathbb{E}(X)) f_x(x) dx}$
+
+$\sigma(X) = \sqrt{\int_{0}^{\infty}(X-\frac{ae^{\lambda b}}{\lambda ^2})^2 \cdot ae^{-\lambda(x-b)}}$
+
+$Var(X) = \mathbb{E}(X^2)-[\mathbb{E}(X)]^2$
+
+$\mathbb{E}(X^2) = \int_{}^{}x^2 \cdot f_x(x) dx$
+
+substituting in $f_x$ and a = $\lambda$
+
+$= \int_{b}^{\infty}x^2\lambda e^{-\lambda(x-b)}$
+
+$= b^2+\frac{2b}{\lambda}+\frac{2}{\lambda^2}$
+
+$(\mathbb{E}(X))^2=(b+\frac{1}{\lambda})^2 = b^2+\frac{2b}{\lambda}+\frac{1}{\lambda^2}$
+
+$Var(X) = (b^2+\frac{2b}{\lambda}+\frac{2}{\lambda^2}) - (b^2+\frac{2b}{\lambda}+\frac{1}{\lambda^2})$
+
+$Var(X) = \frac{1}{\lambda^2}$
+
+$\sigma(X) = \sqrt{\frac{1}{\lambda^2}}$
+
+$\sigma(X) = \frac{1}{\lambda}$
+
+### 3)
+
+Cumulative distribution function: $\int_{-\infty}^{x}f(z) dz$
+
+$=\int_{0}^{x}ae^{-\lambda(x-b)} dx$
+
+$=\frac{a}{\lambda}(e^{\lambda b} - e^{\lambda(b-x)})$
+
+$a = \frac{\lambda}{e^{\lambda b}}$
+
+$= \frac{1}{\lambda} \cdot \frac{\lambda}{e^{\lambda b}} \cdot e^{\lambda b }(1-e^{\lambda x}) = 1-e^{\lambda x}$
+
+$= 1-e^{\lambda x}$
+
+quantile function is the inverse of the cumulative function $Fx^{-1}$
+
+inverse of $1-e^{\lambda x}$
+
+$x = 1-e^{\lambda F(x)^{-1}}$
+
+$1-x = e^{\lambda F(x)^{-1}}$
+
+$\ln (1-x) = \lambda F(x)^{-1}$
+
+$F(x)^{-1}=\frac{\ln(1-x)}{\lambda}$
+
+### Reworking for the result of a = $\lambda$ as shown above
+
+cumulative distribution function: $\int_{-\infty}^{x}f(z) dz$
+
+$=\int_{b}^{x}ae^{-\lambda(x-b)} dx$
+
+$= 1-e^{\lambda (b-x)}$
+
+quantile function is the inverse of the cumulative function $Fx^{-1}$
+
+inverse of $= 1-e^{\lambda (b-x)}$
+
+$F(x)^{-1}=b-\frac{1}{\lambda} \ln(1-x)$
+
+### 4)
+
+Likelihood function for a continuous random variable = $\prod_{i=1}^{n}f_\theta(X_i)$
+
+$=\prod_{i=1}^{n}\begin{cases} ae^{-\lambda(x-b)} & \text{ if } x \ge b \\ 0 & \text{ if } x<b \end{cases}$
+
+$L = \prod_{i=1}^{n}ae^{-\lambda(x-b)}$
+
+$L(\lambda) = \prod_{i=1}^{n}\lambda e^{-\lambda(x-b)}$
+
+$L(\lambda) = \prod_{i=1}^{n} \lambda\cdot e^{-\lambda x} \cdot e^{\lambda b}$
+
+$L(\lambda) = \prod_{i=1}^{n}\lambda \cdot e^{-\lambda (x-b)}$
+
+$\log L(\lambda) = \sum_{i=1}^{n} \ln(\lambda \cdot e^{-\lambda (x-b)})$
+
+$\log L(\lambda) = \sum_{i=1}^{n}(\ln \lambda - \lambda (x+b))$
+
+$\log L(\lambda) = n \ln \lambda - \sum_{i=1}^{n}\lambda (x_i+b)$
+
+$\frac{d \log L}{d \lambda} = \frac{n}{\lambda}-\sum_{i=1}^{n}x_i+b =0$
+
+$\frac{n}{\lambda} = \sum_{i=1}^{n}x_i-b$
+
+$\lambda_{mle} = \frac{n}{\sum_{i=1}^{n} (x_i - b)}$
+
+### 5)
+
+Loading the supermarket data set and displaying the first 5 rows.
+
+```{r}
+folder_path <- "data/"
+file_name <- "supermarket_data_EMATM0061.csv"
+file_path <- paste(folder_path,file_name,sep="")
+supermarket_df <- read.csv(file_path)
+head(supermarket_df,5)
+```
+
+```{r}
+mean(supermarket_df$TimeLength)
+```
+
+Maximum Likelihood Estimate for $\lambda$
+
+```{r}
+sample_size <- length(supermarket_df$TimeLength)
+mle <- sample_size / sum(supermarket_df$TimeLength-300)
+mle
+```
+
+```{r}
+sample_size <- length(supermarket_df$TimeLength)
+mu_mle <- mean(supermarket_df$TimeLength, na.rm=TRUE)
+sigma_mle <- sd(supermarket_df$TimeLength, na.rm=TRUE)*sqrt((sample_size-1)/sample_size)
+
+sample_size
+```
+
+### 6)
+
+```{r}
+set.seed(0)
+compute_median <- function(df,indicies,col_name){
+  sub_sample <- slice(df,indicies) %>% pull(all_of(col_name))
+  return(median(sub_sample, na.rm = TRUE))
+}
+
+results <- boot(data=supermarket_df, statistic=compute_median, col_name="TimeLength", R=10000)
+
+boot.ci(boot.out = results, type = "basic", conf=0.95)
+```
+
+We can see here the confidence interval for the mean with a 95% level is 333.4,337.5
+
+### 7)
+
+```{r}
+#assuming chi-squared distribution
+#assuming df = E(X)
+#replace optimise with the actual formula, there is some extra method
+#it is not normal distribution, it is in the family of exponetial distributions 
+set.seed(0)
+lambda_0 <- 2
+b <- 0.01
+
+df_test <- b+(1/lambda_0)
+
+sample_size <- rep(seq(100,5000,10),each=100)
+
+lambda_mle_est <- function(sample_X){
+  return(length(sample_X)/sum(sample_X-b))
+}
+
+df <- data.frame(trial=sample_size) %>% 
+  mutate(sample=map(.x=trial, ~rchisq(.x,df=df_test)))
+
+chisq_simulation_df <-
+  mutate(df, ml_est=map_dbl(.x=sample, .f=lambda_mle_est)) %>% 
+  mutate(sample_size=map_dbl(.x=sample,.f=length))
+
+head(chisq_simulation_df,5)
+```
+
+```{r}
+msefunc <- function(x){
+  return((x-lambda_0)^2)
+}
+
+ml_estimate_mean_sqr_error <- chisq_simulation_df %>%
+  mutate(mean_sqr_error=map_dbl(.x=ml_est,.f=msefunc))
+
+head(ml_estimate_mean_sqr_error,5)
+```
+
+```{r}
+mean(ml_estimate_mean_sqr_error$mean_sqr_error)
+```
+
+```{r}
+mle_sample_size_plot <- ml_estimate_mean_sqr_error %>% 
+  select(mean_sqr_error,sample_size) %>% 
+  group_by(sample_size) %>% 
+  summarise(mean_sqr_error = mean(mean_sqr_error))
+
+ggplot(mle_sample_size_plot, aes(x=sample_size,y=mean_sqr_error)) +
+  geom_line()
+```
+
+## B.3)
+
+### 1)
+
+P.M.F for X
+
+| Scenario       | X Value | Probability                                |
+|----------------|---------|--------------------------------------------|
+| Red then Blue  | 0       | $\frac{a}{a+b} \times \frac{b}{(a-1)+b}$   |
+| Blue then Red  | 0       | $\frac{b}{a+b} \times \frac{a}{a+(b-1)}$   |
+| Red then Red   | 2       | $\frac{a}{a+b} \times \frac{a-1}{(a-1)+b}$ |
+| Blue then Blue | -2      | $\frac{b}{a+b} \times \frac{b-1}{a+(b-1)}$ |
+
+Because the X value is the same for Red then Blue and Blue then Red and these are independent events we can sum the probabilities for an expression that represents the probability of X being 0
+
+| Scenario                       | X Value | Probability                                                                      |
+|----------------|----------------|----------------------------------------|
+| Red then Blue OR Blue then Red | 0       | $(\frac{a}{a+b}\times\frac{b}{(a-1)+b})+(\frac{b}{a+b}\times \frac{a}{a+(b-1)})$ |
+
+$P_X(x) = \begin{cases} \frac{a}{a+b} \times \frac{a-1}{(a-1)+b}, & \text{if } x = 2 \\ \frac{b}{a+b} \times \frac{b-1}{a+(b-1)}, & \text{if } x = -2 \\ (\frac{a}{a+b}\times\frac{b}{(a-1)+b})+(\frac{b}{a+b}\times \frac{a}{a+(b-1)}) ,& \text{if } x = 0 \end{cases}$
+
+### 2)
+
+Expectation $\mathbb{E}(X)$
+
+$\mathbb{E}(X) = \sum x \cdot P_x$
+
+$= 0 \times ((\frac{a}{a+b}\times\frac{b}{(a-1)+b})+(\frac{b}{a+b}\times \frac{a}{a+(b-1)})) + 2 \times (\frac{a}{a+b} \times \frac{a-1}{(a-1)+b}) + -2 \times (\frac{b}{a+b} \times \frac{b-1}{a+(b-1)})$
+
+$\mathbb{E}(X)=(\frac{2a}{a+b}\times \frac{a-1}{(a-1)+b})+(\frac{-2b}{a+b}\times \frac{b-1}{a+(b-1)})$
+
+### 3)
+
+$Var(X) = \mathbb{E}[(X-\mathbb{E(X)^2}] = \mathbb{E}(X^2)-[E(X)]^2$
+
+$\mathbb{E}(X^2) = (0^2 \times p)+(2^2 \times p)+(-2^2 \times p)$
+
+$= 4 \times (\frac{a}{a+b} \times \frac{a-1}{(a-1)+b})+4 \times (\frac{b}{a+b} \times \frac{b-1}{a+(b-1)})$
+
+$=(\frac{4a}{a+b} \times \frac{a-1}{(a-1)+b})+(\frac{4b}{a+b} \times \frac{b-1}{a+(b-1)})$
+
+$(\mathbb{E}(X))^2 = ((\frac{2a}{a+b} \times \frac{a-1}{(a-1)+b})+(\frac{-2b}{a+b} \times \frac{b-1}{a+(b-1)}))^2$
+
+$Var(X)= ((\frac{4a}{a+b} \times \frac{a-1}{(a-1)+b})+(\frac{4b}{a+b} \times \frac{b-1}{a+(b-1)})) - ((\frac{2a}{a+b} \times \frac{a-1}{(a-1)+b})+(\frac{-2b}{a+b}\times \frac{b-1}{a+(b-1)}))^2$
+
+### 4)
+
+$\mathbb{E}(X) = (\frac{2a}{a+b}\cdot\frac{a-1}{(a-1)+b}) + (\frac{-2b}{a+b}\cdot\frac{b-1}{a+(b-1)})$
+
+```{r}
+compute_expectation_X <- function(a,b){
+  return((((2*a)/(a+b))*((a-1)/((a-1)+b))) + (((-2*b)/(a+b))*((b-1)/(a+(b-1)))))
+}
+compute_expectation_X(10,10)
+```
+
+$Var(X) = ((\frac{4a}{a+b}\cdot\frac{a-1}{(a-1)+b})+(\frac{4b}{a+b}\cdot \frac{b-1}{a+(b-1)}))-((\frac {2a}{a+b}\cdot\frac{a-1}{(a-1)+b})+(\frac{-2b}{a+b}\cdot\frac{b-1}{a+(b-1)}))^2$
+
+```{r}
+compute_varience_X <- function(a,b){
+  return(((((4*a)/(a+b))*((a-1)/((a-1)+b)))+(((4*b)/(a+b))* ((b-1)/(a+(b-1)))))-((((2*a)/(a+b))*((a-1)/((a-1)+b)))+(((-2*b)/(a+b))*((b-1)/(a+(b-1)))))^2)
+}
+compute_varience_X(3,5)
+```
+
+### 5)
+
+$X_1,X_1 ... X_n$ are independent copies of X. So $X_1,X_1 ... X_n$ are independent and identically distributed (i.i.d)
+
+$\bar{X} = \frac{1}{n}\sum_{i=1}^{n}X_i$
+
+$\mathbb{E}(\bar{X}) = \mathbb{E}[\frac{1}{n} \sum_{i=1}^{n} X_i]$
+
+$=\frac{1}{n}[\mathbb{E}(X_1)+\mathbb{E}(X_2).+.. +\mathbb{E}(X_n)]$
+
+$=\frac{1}{n}\sum_{i=1}^{n}E(X_i) = E(X)$
+
+$\mathbb{E}(X) = \mathbb{E}(\bar{X})=\mathbb{E}(X) = (\frac{2a}{a+b}\cdot\frac{a-1}{(a-1)+b}) + (\frac{-2b}{a+b}\cdot\frac{b-1}{a+(b-1)})$
+
+### 6)
+
+$\bar{X} = \frac{1}{n}\sum_{i=1}^{n}X_i$
+
+$Var(\sum_{i=1}^{n}X_i)=\sum_{i=1}^{n}Var(X_i)+2\sum_{1 \le i<j \le n}Cov(X_i,X_j)$
+
+Because $X_1,X_1 ... X_n$ are independent we know $Cov(X_i,X_j) =0$
+
+Therefore
+
+$Var(\bar{X})=\frac{Var(X)}{n}$
+
+$Var(\bar{X})=\frac{((\frac{4a}{a+b} \times \frac{a-1}{(a-1)+b})+(\frac{4b}{a+b} \times \frac{b-1}{a+(b-1)})) - ((\frac{2a}{a+b} \times \frac{a-1}{(a-1)+b})+(\frac{-2b}{a+b}\times \frac{b-1}{a+(b-1)}))^2}{n}$
+
+### 7)
+
+```{r}
+sample_Xs <- function(a,b,n){
+  prob_X0 <- ((a/(a+b))*(b/((a-1)+b))+((b/(a+b))*(a/(a+(b-1)))))
+  probX2 <- (a/(a+b))*((a-1)/(b+((a-1))))
+  probXneg2 <- (b/(a+b))*((b-1)/(a+(b-1)))
+  probs <-c(prob_X0,probX2,probXneg2)
+  set.seed(0)
+  sample_X <- data.frame(U=runif(n)) %>%
+  mutate(X=case_when(
+  (0<=U)&(U<prob_X0)~0,
+  (prob_X0<=U)&(U<prob_X0+probX2)~2,
+  (prob_X0+probX2<=U)&(U<=1)~-2)) %>%
+  pull(X)
+  return(sample_X)
+}
+sample_Xs(3,5,10)
+```
+
+### 8)
+
+expectation of X
+
+```{r}
+compute_expectation_X(3,5)
+```
+
+variance of X
+
+```{r}
+compute_varience_X(3,5)
+```
+
+```{r}
+generated_samp <- sample_Xs(3,5,100000)
+```
+
+mean of sample
+
+```{r}
+mean(generated_samp)
+```
+
+variance of sample
+
+```{r}
+var(generated_samp)
+```
+
+The sample mean and variance are very similar to that of the calculated $\mathbb{E}(X)$ and $Var(X)$, as the number of trials increases to infinity we would expect the sample mean and variance to tend towards the calculated $\mathbb{E}(X)$ and $Var(X)$.
+
+### 9)
+
+```{r}
+num_trials <- 20000
+a <- 3
+b <- 5
+n <- 900
+
+mu <- compute_expectation_X(a,b)
+sigma_squared <- (sqrt(compute_varience_X(a,b)/n))^2
+
+discrete_var_sim_df <- data.frame(trial=seq(num_trials)) %>% 
+  mutate(sample=map(.x=trial, ~rnorm(n, mu, sigma_squared))) %>% 
+  mutate(sample_mean=map_dbl(.x=sample,.f=mean))
+
+mean(discrete_var_sim_df$sample_mean)
+```
+
+### 10)
+
+```{r}
+mu <- compute_expectation_X(3,5)
+sigma <- (sqrt(compute_varience_X(3,5)/n))
+
+lower <- compute_expectation_X(3,5)-(3*(sqrt(compute_varience_X(3,5)/n)))
+upper <- compute_expectation_X(3,5)+(3*(sqrt(compute_varience_X(3,5)/n)))
+interval <- (sqrt(compute_varience_X(3,5)/n))*0.1
+x_i <- seq(lower,upper,interval)
+
+plot_df <- data.frame(x=x_i) %>% 
+  mutate(func_x=map_dbl(.x=x_i, ~dnorm(.x,mu,sigma)))
+```
+
+```{r}
+ggplot() + 
+  geom_point(data = plot_df, aes(x = x, y = func_x, color = "Theoretical density")) +
+  # Add curve for sample kernel density
+  geom_density(data = discrete_var_sim_df, aes(x = sample_mean, color = "Sample kernel density")) +
+  # Scale y axis to match theoretical density plot
+  scale_y_continuous(limits = c(0, max(plot_df$func_x)))
+```
+
+```{r}
+ggplot() +
+#Sample Kernel Density 
+  geom_density(data=discrete_var_sim_df,
+               aes(x=sample_mean,color="Sample kernel density",linetype="Sample kernel density"))
+```
+
+### 11)
+
+The reason for this relationship is described by the central limit theorem, which states that the sum of a large number of independent, identically distributed random variables tends to a normal distribution, regardless of the shape of the original distribution. Since the sample mean $\bar{X}$ is the sum of n independent, identically distributed random variables (i.e., the independent copies of X), it follows that the distribution of $\bar{X}$ should approach a normal distribution as the sample size n increases. This is why the density of $\bar{X}$ should be approximately Gaussian, similar to the shape of the probability density function $f_{\mu,\sigma}$ . The reason the kernel density plot has such a small variance is as described in question 6 where a variance of the means of a large number sample sets is the variance expected in a single sample set divided by n. As n here is very large this leaves us with a very small variance.
