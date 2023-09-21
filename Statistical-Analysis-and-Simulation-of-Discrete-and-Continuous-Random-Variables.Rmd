@@ -1,6 +1,6 @@
 ---
-title: "SCEM - Assessment - B"
-author: "ND22051"
+title: "Statistical-Analysis-and-Simulation-of-Discrete-and-Continuous-Random-Variables"
+author: "Felix Mayo"
 date: "2022-12-05"
 output: pdf_document
 ---
@@ -12,9 +12,9 @@ library(ggplot2)
 library(boot)
 ```
 
-# Section B
+# Section A
 
-## B.1
+## A.1
 
 ### 1)
 
@@ -95,7 +95,7 @@ est <- nrow(filter(sub_simulation_study_df, Line==1)) / nrow(sub_simulation_stud
 est
 ```
 
-## B.2
+## A.2
 
 ### 1)
 
@@ -411,7 +411,7 @@ ggplot(mle_sample_size_plot, aes(x=sample_size,y=mean_sqr_error)) +
   geom_line()
 ```
 
-## B.3)
+## A.3)
 
 ### 1)
 
